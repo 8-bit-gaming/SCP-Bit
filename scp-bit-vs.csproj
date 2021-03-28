@@ -7,8 +7,8 @@
     <ProjectGuid>{6509876F-E016-4309-A268-7FF2FEA0F994}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>scp_bit_vs</RootNamespace>
-    <AssemblyName>scp-bit-vs</AssemblyName>
+    <RootNamespace>SCP_Bit</RootNamespace>
+    <AssemblyName>SCP_Bit</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
