@@ -1,6 +1,8 @@
 ﻿using Exiled.API.Features;
 using Newtonsoft.Json;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -44,7 +46,6 @@ namespace SCP_Bit.Utils
             Log.Debug("Issuing webhook request...");
             var payload = new WebhookRequest
             {
-                Token = _token,
                 Content = content,
                 Username = username,
                 WaitForResponse = wait
@@ -54,13 +55,27 @@ namespace SCP_Bit.Utils
 
             var stringPayload = JsonConvert.SerializeObject(payload);
             var httpContent = new StringContent(stringPayload, Encoding.UTF8, "application/json");
-            var response = await _client.PostAsync(BitPlugin.Instance.Config.WebhookServer, httpContent);
+
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(BitPlugin.Instance.Config.WebhookAuth);
+            var response = await _client.PostAsync($"{BitPlugin.Instance.Config.WebhookServer}/{_token}", httpContent);
 
             Log.Debug($"Response Status: {response.StatusCode}");
-            
+            string responseContent = null;
+            if (!response.IsSuccessStatusCode)
+            {
+                responseContent = await response.Content.ReadAsStringAsync();
+                Log.Debug(responseContent);
+            }
+
             if (!payload.WaitForResponse) return null;
 
-            return await response.Content.ReadAsStringAsync();
-        }
+            // imagine not being able to do `responseContent || await response.Content...`
+            // quality lang.
+            if (responseContent != null)
+                return responseContent;
+            else
+                return await response.Content.ReadAsStringAsync();
+
+         }
     }
 }
