@@ -1,12 +1,20 @@
 ﻿using Exiled.API.Features;
 using Exiled.Events.EventArgs;
-
+using System.Linq;
 using Plugin = SCP_Bit.BitPlugin;
 
 namespace SCP_Bit.Handlers
 {
     public class Server
     {
+
+        private readonly Plugin _plugin;
+
+        public Server(Plugin instance)
+        {
+            this._plugin = instance;
+        }
+
         public void OnWaitingForPlayers()
         {
             Log.Info("Standing by for players...");
@@ -14,16 +22,20 @@ namespace SCP_Bit.Handlers
 
         public async void OnRoundStarted()
         {
-            await Plugin.Instance.WebhookExecutor.ExecuteWebhook(
-                $"Round started!",
+            var playerCount = Exiled.API.Features.Player.List.Count();
+            var playerText = playerCount > 1 ? "players" : "player";
+            await _plugin.PublicWebhookExecutor.ExecuteWebhook(
+                $"Round started with {playerCount} {playerText}!",
                 "SCP-Bot",
                 false);
         }
 
         public async void OnRoundEnded(RoundEndedEventArgs ev)
         {
-            await Plugin.Instance.WebhookExecutor.ExecuteWebhook(
-                $"Round ended, restarting in {ev.TimeToRestart} seconds",
+            var playerCount = Exiled.API.Features.Player.List.Count();
+            var playerText = playerCount > 1 ? "players" : "player";
+            await _plugin.PublicWebhookExecutor.ExecuteWebhook(
+                $"Round ended with {playerCount} {playerText}, restarting in {ev.TimeToRestart} seconds",
                 "SCP-Bot",
                 false);
         }

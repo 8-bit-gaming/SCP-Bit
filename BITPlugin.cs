@@ -13,26 +13,31 @@ namespace SCP_Bit
 
         private Handlers.Player _playerEvents;
         private Handlers.Server _serverEvents;
-        public Webhook WebhookExecutor;
+        public Webhook PublicWebhookExecutor;
+        public Webhook PrivateWebhookExecutor;
 
         public override void OnEnabled()
         {
-            WebhookExecutor = new Webhook(Config.WebhookToken);
+            PublicWebhookExecutor = new Webhook(Config.PublicWebhookID);
+            PrivateWebhookExecutor = new Webhook(Config.PrivateWebhookID);
             RegisterEvents();
         }
 
         public override void OnDisabled()
         {
             UnregisterEvents();
-            WebhookExecutor = null;
+            PublicWebhookExecutor = null;
+            PrivateWebhookExecutor = null;
         }
 
         private void RegisterEvents()
         {
-            _playerEvents = new Handlers.Player();
-            _serverEvents = new Handlers.Server();
+            _playerEvents = new Handlers.Player(this);
+            _serverEvents = new Handlers.Server(this);
 
             Server.WaitingForPlayers += _serverEvents.OnWaitingForPlayers;
+
+            // Public events
             Server.RoundStarted += _serverEvents.OnRoundStarted;
             Server.RoundEnded += _serverEvents.OnRoundEnded;
 

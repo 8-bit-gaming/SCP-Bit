@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using Exiled.API.Features;
 using Exiled.Events.EventArgs;
+using SCP_Bit.Utils;
 using scp_bit_vs.Utils;
 using Plugin = SCP_Bit.BitPlugin;
 
@@ -12,24 +12,25 @@ namespace SCP_Bit.Handlers
 {
     public class Player
     {
-
         // A List to prevent webhook spam if a player is kicked/banned.
         private readonly List<int> _recentlyRemoved = new List<int>();
+        private readonly Plugin _plugin;
+        private readonly Webhook _publicWebhook;
+        private readonly Webhook _privateWebhook;
 
-        public async void OnVerified(VerifiedEventArgs ev)
+        public Player(Plugin instance)
         {
-            await Plugin.Instance.WebhookExecutor.ExecuteWebhook(
-                $"{ev.Player.Nickname} has joined the server.",
-                "SCP-Bot",
-                false);
+            this._plugin = instance;
+            this._publicWebhook = _plugin.PublicWebhookExecutor;
+            this._privateWebhook = _plugin.PrivateWebhookExecutor;
         }
-       
+
         public async void OnBanned(BannedEventArgs ev)
         {
             StringBuilder builder = new StringBuilder();
             builder.AppendLine("**The ban hammer has fallen!**");
-            builder.AppendLine($"Player: {ev.Target.Nickname} ({ev.Target.Id})");
-            builder.AppendLine($"Issuer: {ev.Issuer.Nickname} ({ev.Issuer.Id})");
+            builder.AppendLine($"Player: {ev.Target.Nickname} ({ev.Target.UserId})");
+            builder.AppendLine($"Issuer: {ev.Issuer.Nickname} ({ev.Issuer.UserId})");
 
             var expiresDate = new DateTime(ev.Details.Expires);
             var relative = TimeUtils.ToRelativeTimeFuture(expiresDate, DateTime.UtcNow);
@@ -38,8 +39,8 @@ namespace SCP_Bit.Handlers
 
             _recentlyRemoved.Add(ev.Target.Id);
 
-            await Plugin.Instance.WebhookExecutor.ExecuteWebhook(
-                 builder.ToString(),
+            await _publicWebhook.ExecuteWebhook(
+                builder.ToString(),
                  "SCP-Police",
                  false
                 );
@@ -52,13 +53,13 @@ namespace SCP_Bit.Handlers
 
             StringBuilder builder = new StringBuilder();
             builder.AppendLine("**Player kicked**");
-            builder.AppendLine($"Name: {ev.Target.Nickname}");
+            builder.AppendLine($"Name: {ev.Target.Nickname} ({ev.Target.UserId}");
             builder.AppendLine($"Reason: {ev.Reason}");
 
             _recentlyRemoved.Add(ev.Target.Id);
 
-            await Plugin.Instance.WebhookExecutor.ExecuteWebhook(
-                builder.ToString(),
+            await _publicWebhook.ExecuteWebhook(
+               builder.ToString(),
                 "SCP-Police",
                 false
                );
@@ -72,8 +73,10 @@ namespace SCP_Bit.Handlers
                 return;
             }
 
-            await Plugin.Instance.WebhookExecutor.ExecuteWebhook(
-                $"{ev.Player.Nickname} has left the server.",
+            var playerCount = Exiled.API.Features.Player.List.Count();
+            var playerText = playerCount > 1 ? "players" : "player";
+            await _publicWebhook.ExecuteWebhook(
+               $"{ev.Player.Nickname} has left the server. ({playerCount - 1} {playerText} active)",
                 "SCP-Bot",
                 false);
 
