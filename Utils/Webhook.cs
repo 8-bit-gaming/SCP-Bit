@@ -64,7 +64,7 @@ namespace SCP_Bit.Utils
             if (!response.IsSuccessStatusCode)
             {
                 responseContent = await response.Content.ReadAsStringAsync();
-                Log.Debug(responseContent);
+                Log.Error($"Request to webhook failed: {responseContent}");
             }
 
             if (!payload.WaitForResponse) return null;

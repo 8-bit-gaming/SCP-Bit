@@ -53,7 +53,7 @@ namespace SCP_Bit.Handlers
 
             StringBuilder builder = new StringBuilder();
             builder.AppendLine("**Player kicked**");
-            builder.AppendLine($"Name: {ev.Target.Nickname} ({ev.Target.UserId}");
+            builder.AppendLine($"Name: {ev.Target.Nickname} ({ev.Target.UserId})");
             builder.AppendLine($"Reason: {ev.Reason}");
 
             _recentlyRemoved.Add(ev.Target.Id);
