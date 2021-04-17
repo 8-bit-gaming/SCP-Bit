@@ -41,10 +41,19 @@ namespace SCP_Bit
             Server.RoundStarted += _serverEvents.OnRoundStarted;
             Server.RoundEnded += _serverEvents.OnRoundEnded;
 
-            Player.Verified += _playerEvents.OnVerified;
             Player.Left += _playerEvents.OnLeave;
             Player.Banned += _playerEvents.OnBanned;
             Player.Kicked += _playerEvents.OnKicked;
+
+            // Private events (Logs that could affect gameplay)
+            Player.Hurting += _playerEvents.OnHurting;
+            Player.EnteringPocketDimension += _playerEvents.OnPocketDimensionEnter;
+            Player.EscapingPocketDimension += _playerEvents.OnPocketDimensionEscape;
+            Player.FailingEscapePocketDimension += _playerEvents.OnPocketDimensionEscapeFailed;
+            Player.ActivatingWarheadPanel += _playerEvents.OnWarheadPanelActivating;
+            Player.Escaping += _playerEvents.OnEscape;
+            Player.Handcuffing += _playerEvents.OnHandcuffing;
+            Player.IntercomSpeaking += _playerEvents.OnIntercomSpeaking;
         }
 
         private void UnregisterEvents()
@@ -53,10 +62,18 @@ namespace SCP_Bit
             Server.RoundStarted -= _serverEvents.OnRoundStarted;
             Server.RoundEnded -= _serverEvents.OnRoundEnded;
 
-            Player.Verified -= _playerEvents.OnVerified;
             Player.Left -= _playerEvents.OnLeave;
             Player.Banned -= _playerEvents.OnBanned;
             Player.Kicked -= _playerEvents.OnKicked;
+
+            Player.Hurting -= _playerEvents.OnHurting;
+            Player.EnteringPocketDimension -= _playerEvents.OnPocketDimensionEnter;
+            Player.EscapingPocketDimension -= _playerEvents.OnPocketDimensionEscape;
+            Player.FailingEscapePocketDimension -= _playerEvents.OnPocketDimensionEscapeFailed;
+            Player.ActivatingWarheadPanel -= _playerEvents.OnWarheadPanelActivating;
+            Player.Escaping -= _playerEvents.OnEscape;
+            Player.Handcuffing -= _playerEvents.OnHandcuffing;
+            Player.IntercomSpeaking -= _playerEvents.OnIntercomSpeaking;
 
             _playerEvents = null;
             _serverEvents = null;

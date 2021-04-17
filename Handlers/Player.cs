@@ -81,5 +81,137 @@ namespace SCP_Bit.Handlers
                 false);
 
         }
+
+        // private
+
+        public async void OnHurting(HurtingEventArgs ev)
+        {
+            // Team damage
+            if ((ev.Target.Team == ev.Attacker.Team) && (ev.Target != ev.Attacker))
+            {
+                StringBuilder builder = new StringBuilder();
+                builder.AppendLine("**TEAM DAMAGE**");
+                builder.AppendLine($"Attacker: {ev.Attacker.Nickname} ({ev.Attacker.UserId})");
+                builder.AppendLine($"Target: {ev.Target.Nickname} ({ev.Target.UserId})");
+                builder.AppendLine($"Weapon: {ev.HitInformations.GetDamageName()}");
+                builder.AppendLine($"Amount: {ev.HitInformations.Amount}");
+
+                await _privateWebhook.ExecuteWebhook(
+                    builder.ToString(),
+                    "SCP-Police",
+                    false);
+            }
+        }
+
+        // Record times for how long a player was in the pocket dimension
+        private readonly Dictionary<int, DateTime> _pocketDimensionTime = new Dictionary<int, DateTime>();
+
+        public async void OnPocketDimensionEnter(EnteringPocketDimensionEventArgs ev)
+        {
+            var player = ev.Player;
+            var dateTime = DateTime.UtcNow;
+
+            _pocketDimensionTime.Add(player.Id, dateTime);
+            await _privateWebhook.ExecuteWebhook(
+                $"{player.Nickname} entered the pocket dimension!",
+                "SCP-Bot",
+                false
+            );
+        }
+
+        public async void OnPocketDimensionEscape(EscapingPocketDimensionEventArgs ev)
+        {
+            var player = ev.Player;
+            var currentTime = DateTime.UtcNow;
+            var initialTime = _pocketDimensionTime[player.Id];
+            var relativeTime = TimeUtils.ToRelativeTimeFuture(initialTime, currentTime);
+
+            StringBuilder builder = new StringBuilder();
+            builder.AppendLine("**Player escaped the pocket dimension**");
+            builder.AppendLine($"Name: {player.Nickname} ({player.UserId})");
+            builder.AppendLine($"Escaped {relativeTime}");
+
+            _pocketDimensionTime.Remove(player.Id);
+
+            await _privateWebhook.ExecuteWebhook(
+                builder.ToString(),
+                "SCP-Bot",
+                false
+            );
+        }
+
+        public async void OnPocketDimensionEscapeFailed(FailingEscapePocketDimensionEventArgs ev)
+        {
+            var player = ev.Player;
+            var currentTime = DateTime.UtcNow;
+            var initialTime = _pocketDimensionTime[player.Id];
+            var relativeTime = TimeUtils.ToRelativeTimeFuture(initialTime, currentTime);
+
+            StringBuilder builder = new StringBuilder();
+            builder.AppendLine("**Player failed to escape the pocket dimension**");
+            builder.AppendLine($"Name: {player.Nickname} ({player.UserId})");
+            builder.AppendLine($"Failed escape {relativeTime}");
+
+            _pocketDimensionTime.Remove(player.Id);
+
+            await _privateWebhook.ExecuteWebhook(
+                builder.ToString(),
+                "SCP-Bot",
+                false
+            );
+        }
+
+        public async void OnWarheadPanelActivating(ActivatingWarheadPanelEventArgs ev)
+        {
+            if (ev.IsAllowed)
+            {
+
+                StringBuilder builder = new StringBuilder();
+                builder.AppendLine("**Activating Warhead Panel**");
+                builder.AppendLine($"Name: {ev.Player.Nickname} ({ev.Player.UserId})");
+
+                await _privateWebhook.ExecuteWebhook(
+                    builder.ToString(),
+                    "SCP-Bot",
+                    false
+                );
+            }
+        }
+
+        public async void OnEscape(EscapingEventArgs ev)
+        {
+            if (ev.IsAllowed)
+            {
+                await _privateWebhook.ExecuteWebhook(
+                    $"{ev.Player.Nickname} ({ev.Player.UserId}) escaped!",
+                    "SCP-Bot",
+                    false
+                );
+            }
+        }
+
+        public async void OnHandcuffing(HandcuffingEventArgs ev)
+        {
+            if (ev.IsAllowed)
+            {
+                await _privateWebhook.ExecuteWebhook(
+                    $"{ev.Cuffer.Nickname} ({ev.Cuffer.UserId}) is handcuffing {ev.Target.Nickname} ({ev.Target.UserId})!",
+                    "SCP-Bot",
+                    false
+                );
+            }
+        }
+
+        public async void OnIntercomSpeaking(IntercomSpeakingEventArgs ev)
+        {
+            if (ev.IsAllowed)
+            {
+                await _privateWebhook.ExecuteWebhook(
+                     $"{ev.Player.Nickname} ({ev.Player.UserId}) is speaking on the intercom",
+                     "SCP-Bot",
+                     false
+                );
+            }
+        }
     }
 }
